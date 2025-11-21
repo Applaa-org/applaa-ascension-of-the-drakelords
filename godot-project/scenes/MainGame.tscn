@@ -1,0 +1,244 @@
+[gd
+
+[gd_scene load_steps=3 format=3 uid="uid://main_game_scene"]
+
+[ext_resource type="Script" path="res://scripts/MainGame.gd" id="1_main_game"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+background_color = Color(0.117647, 0.117647, 0.117647, 1)
+
+[node name="MainGame" type="Node2D"]
+script = ExtResource("1_main_game")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.1, 0.1, 0.15, 1)
+
+[node name="Platforms" type="Node2D" parent="."]
+
+[node name="Ground" type="StaticBody2D" parent="Platforms"]
+position = Vector2(640, 600)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Ground"]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="Sprite2D" type="Sprite2D" parent="Platforms/Ground"]
+modulate = Color(0.2, 0.2, 0.3, 1)
+
+[node name="Platform1" type="StaticBody2D" parent="Platforms"]
+position = Vector2(300, 450)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Platform1"]
+shape = SubResource("RectangleShape2D_platform_small")
+
+[node name="Sprite2D" type="Sprite2D" parent="Platforms/Platform1"]
+modulate = Color(0.3, 0.3, 0.4, 1)
+
+[node name="Platform2" type="StaticBody2D" parent="Platforms"]
+position = Vector2(600, 350)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Platform2"]
+shape = SubResource("RectangleShape2D_platform_small")
+
+[node name="Sprite2D" type="Sprite2D" parent="Platforms/Platform2"]
+modulate = Color(0.3, 0.3, 0.4, 1)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="TopUI" type="HBoxContainer" parent="UI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 60.0
+
+[node name="ScoreLabel" type="Label" parent="UI/TopUI"]
+layout_mode = 2
+text = "Score: 0"
+modulate = Color(0.29, 0.62, 1, 1)
+
+[node name="VSeparator" type="VSeparator" parent="UI/TopUI"]
+layout_mode = 2
+
+[node name="LevelLabel" type="Label" parent="UI/TopUI"]
+layout_mode = 2
+text = "Level: 1"
+
+[node name="VSeparator" type="VSeparator" parent="UI/TopUI"]
+layout_mode = 2
+
+[node name="BiomeLabel" type="Label" parent="UI/TopUI"]
+layout_mode = 2
+text = "Biome: Dragon Peak"
+
+[node name="VSeparator" type="VSeparator" parent="UI/TopUI"]
+layout_mode = 2
+
+[node name="EnemiesLabel" type="Label" parent="UI/TopUI"]
+layout_mode = 2
+text = "Enemies: 0/0"
+modulate = Color(1, 0.53, 0, 1)
+
+[node name="StartScreen" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+modulate = Color(1, 1, 1, 1)
+
+[node name="BackgroundPanel" type="ColorRect" parent="UI/StartScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.8)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/StartScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+
+[node name="TitleLabel" type="Label" parent="UI/StartScreen/VBoxContainer"]
+layout_mode = 2
+text = "Ascension of the Drakelords"
+modulate = Color(1, 0.53, 0, 1)
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="UI/StartScreen/VBoxContainer"]
+layout_mode = 2
+text = "A Cinematic Action RPG"
+modulate = Color(0.7, 0.7, 0.7, 1)
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/StartScreen/VBoxContainer"]
+layout_mode = 2
+modulate = Color(0.5, 0.5, 0.5, 1)
+
+[node name="InstructionsLabel" type="Label" parent="UI/StartScreen/VBoxContainer"]
+layout_mode = 2
+text = "Controls:
+WASD/Arrows - Move
+Space - Jump
+Q - Dragon Breath
+Shift - Wing Burst
+R - Ancient Rage"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="HSeparator2" type="HSeparator" parent="UI/StartScreen/VBoxContainer"]
+layout_mode = 2
+modulate = Color(0.5, 0.5, 0.5, 1)
+
+[node name="StartButton" type="Button" parent="UI/StartScreen/VBoxContainer"]
+layout_mode = 2
+text = "Start Game"
+modulate = Color(0.29, 0.62, 1, 1)
+
+[node name="VictoryScreen" type="Control" parent="UI"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="BackgroundPanel" type="ColorRect" parent="UI/VictoryScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.8)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/VictoryScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+
+[node name="VictoryLabel" type="Label" parent="UI/VictoryScreen/VBoxContainer"]
+layout_mode = 2
+text = "VICTORY!"
+modulate = Color(0, 1, 0, 1)
+horizontal_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="UI/VictoryScreen/VBoxContainer"]
+layout_mode = 2
+text = "Score: 0"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/VictoryScreen/VBoxContainer"]
+layout_mode = 2
+
+[node name="NextLevelButton" type="Button" parent="UI/VictoryScreen/VBoxContainer"]
+layout_mode = 2
+text = "Next Level"
+
+[node name="RestartButton" type="Button" parent="UI/VictoryScreen/VBoxContainer"]
+layout_mode = 2
+text = "Restart"
+
+[node name="DefeatScreen" type="Control" parent="UI"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="BackgroundPanel" type="ColorRect" parent="UI/DefeatScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.8)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/DefeatScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+
+[node name="DefeatLabel" type="Label" parent="UI/DefeatScreen/VBoxContainer"]
+layout_mode = 2
+text = "DEFEAT"
+modulate = Color(1, 0, 0, 1)
+horizontal_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="UI/DefeatScreen/VBoxContainer"]
+layout_mode = 2
+text = "Score: 0"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/DefeatScreen/VBoxContainer"]
+layout_mode = 2
+
+[node name="RestartButton" type="Button" parent="UI/DefeatScreen/VBoxContainer"]
+layout_mode = 2
+text = "Restart"
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="Audio"]
+
+[node name="SFXPlayer" type="AudioStreamPlayer" parent="Audio"]

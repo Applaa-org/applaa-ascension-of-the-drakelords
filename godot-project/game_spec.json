@@ -1,0 +1,222 @@
+{
+  "game": {
+    "name": "Ascension of the Drakelords",
+    "type": "2D",
+    "description": "A cinematic mobile-first action RPG where players rise to power as a Drakelord in a world of political intrigue, ancient prophecies, and cosmic threats. Battle through diverse biomes, forge alliances, and shape the fate of realms through your choices.",
+    "genre": "rpg",
+    "version": "1.0.0"
+  },
+  "settings": {
+    "window": {
+      "width": 1280,
+      "height": 720,
+      "resizable": true,
+      "fullscreen": false
+    },
+    "physics": {
+      "enabled": true
+    },
+    "rendering": {}
+  },
+  "player": {
+    "class": "Drakelord",
+    "max_health": 150,
+    "speed": 200,
+    "attack_power": 25,
+    "defense": 10,
+    "abilities": [
+      {
+        "name": "Dragon Breath",
+        "key": "Q",
+        "cooldown": 3.0,
+        "damage": 35,
+        "type": "projectile"
+      },
+      {
+        "name": "Wing Burst",
+        "key": "Shift",
+        "cooldown": 5.0,
+        "type": "mobility"
+      },
+      {
+        "name": "Ancient Rage",
+        "key": "R",
+        "cooldown": 10.0,
+        "duration": 5.0,
+        "type": "buff"
+      }
+    ]
+  },
+  "enemies": [
+    {
+      "name": "Cultist",
+      "health": 40,
+      "speed": 80,
+      "damage": 15,
+      "behavior": "patrol",
+      "biomes": ["dragon_peak", "ancient_ruins"]
+    },
+    {
+      "name": "Wyvern",
+      "health": 60,
+      "speed": 120,
+      "damage": 20,
+      "behavior": "chase",
+      "biomes": ["dragon_peak", "cosmic_realm"]
+    },
+    {
+      "name": "Guardian",
+      "health": 100,
+      "speed": 60,
+      "damage": 30,
+      "behavior": "chase",
+      "biomes": ["ancient_ruins", "cosmic_realm"]
+    }
+  ],
+  "biomes": [
+    {
+      "name": "dragon_peak",
+      "display_name": "Dragon Peak",
+      "background_color": "#1a1a2e",
+      "platform_color": "#3c3c3c",
+      "music": "main_theme"
+    },
+    {
+      "name": "ancient_ruins",
+      "display_name": "Ancient Ruins",
+      "background_color": "#2d1b1b",
+      "platform_color": "#4a3a3a",
+      "music": "battle_theme"
+    },
+    {
+      "name": "cosmic_realm",
+      "display_name": "Cosmic Realm",
+      "background_color": "#1a0d2e",
+      "platform_color": "#2a1a4a",
+      "music": "victory_theme"
+    }
+  ],
+  "levels": [
+    {
+      "id": 1,
+      "biome": "dragon_peak",
+      "enemies": ["cultist", "wyvern", "cultist"],
+      "difficulty": "easy"
+    },
+    {
+      "id": 2,
+      "biome": "ancient_ruins",
+      "enemies": ["guardian", "wyvern", "cultist", "guardian"],
+      "difficulty": "medium"
+    },
+    {
+      "id": 3,
+      "biome": "cosmic_realm",
+      "enemies": ["guardian", "wyvern", "wyvern"],
+      "difficulty": "hard"
+    }
+  ],
+  "scenes": [
+    "Player.tscn",
+    "Enemy.tscn",
+    "MainGame.tscn",
+    "DragonBreath.tscn",
+    "WingEffect.tscn",
+    "ImpactEffect.tscn"
+  ],
+  "scripts": [
+    "Player.gd",
+    "Enemy.gd",
+    "MainGame.gd",
+    "DragonBreath.gd"
+  ],
+  "assets": {
+    "sprites": [
+      {
+        "name": "drakelord",
+        "path": "res://assets/sprites/drakelord.png",
+        "type": "character"
+      },
+      {
+        "name": "cultist",
+        "path": "res://assets/sprites/cultist.png",
+        "type": "character"
+      },
+      {
+        "name": "wyvern",
+        "path": "res://assets/sprites/wyvern.png",
+        "type": "character"
+      },
+      {
+        "name": "guardian",
+        "path": "res://assets/sprites/guardian.png",
+        "type": "character"
+      },
+      {
+        "name": "dragon_peak_bg",
+        "path": "res://assets/backgrounds/dragon_peak.png",
+        "type": "background"
+      },
+      {
+        "name": "ruins_bg",
+        "path": "res://assets/backgrounds/ruins.png",
+        "type": "background"
+      },
+      {
+        "name": "cosmic_bg",
+        "path": "res://assets/backgrounds/cosmic.png",
+        "type": "background"
+      }
+    ],
+    "sounds": [
+      {
+        "name": "dragon_breath",
+        "path": "res://assets/sounds/dragon_breath.wav",
+        "type": "sfx"
+      },
+      {
+        "name": "winged_flight",
+        "path": "res://assets/sounds/wing_flap.wav",
+        "type": "sfx"
+      },
+      {
+        "name": "claw_attack",
+        "path": "res://assets/sounds/claw_attack.wav",
+        "type": "sfx"
+      },
+      {
+        "name": "ancient_rage",
+        "path": "res://assets/sounds/ancient_rage.wav",
+        "type": "sfx"
+      },
+      {
+        "name": "enemy_hit",
+        "path": "res://assets/sounds/enemy_hit.wav",
+        "type": "sfx"
+      },
+      {
+        "name": "level_complete",
+        "path": "res://assets/sounds/level_complete.wav",
+        "type": "sfx"
+      }
+    ],
+    "music": [
+      {
+        "name": "main_theme",
+        "path": "res://assets/music/main_theme.ogg"
+      },
+      {
+        "name": "battle_theme",
+        "path": "res://assets/music/battle_theme.ogg"
+      },
+      {
+        "name": "victory_theme",
+        "path": "res://assets/music/victory_theme.ogg"
+      },
+      {
+        "name": "menu_theme",
+        "path": "res://assets/music/menu_theme.ogg"
+      }
+    ]
+  }
+}

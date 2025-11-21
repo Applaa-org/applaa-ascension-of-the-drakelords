@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ascension of the Drakelords</title>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+        #gameContainer {
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+        #gameCanvas {
+            border: 3px solid #ff8800;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #2d2d30 100%);
+            box-shadow: 0 8px 32px rgba(255, 136, 0, 0.4), 0 0 60px rgba(255, 136, 0, 0.2);
+            display: block;
+            margin: 20px auto;
+            position: relative;
+        }
+        h1 {
+            color: #ff8800;
+            margin-bottom: 10px;
+            font-size: 32px;
+            text-shadow: 0 0 20px rgba(255, 136, 0, 0.5);
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .info {
+            color: #b0b0b0;
+            font-size: 16px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .controls {
+            margin-top: 15px;
+            color: #cccccc;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 136, 0, 0.3);
+        }
+        .score {
+            color: #4ade80;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .ui-panel {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ff8800;
+            border-radius: 8px;
+            padding: 10px 15px;
+            backdrop-filter: blur(5px);
+        }
+        .ui-text {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 2px 0;
+        }
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-radius: 12px;
+        }
+        .start-screen h2 {
+            color: #ff8800;
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(255, 136, 0, 0.8);
+        }
+        .start-button {
+            background: linear-gradient(135deg, #ff8800, #ff6600);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 136, 0, 0.4);
+        }
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(255, 136, 0, 0.6);
+        }
+        .instructions {
+            color: #b0b0b0;
+            margin: 20px 0;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .ability-cooldown {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        .ability-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ff8800;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .ability-icon.ready {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: #00ff00;
+        }
+        .ability-icon.cooldown {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <h1>🐉 Ascension of the Drakelords</h1>
+        <div class="info">A Cinematic Action RPG - Rise to Power as a Drakelord</div>
+        
+        <div style="position: relative;">
+            <canvas id="gameCanvas" width="1280" height="720"></canvas>
+            
+            <!-- UI Overlay -->
+            <div class="ui-overlay">
+                <div class="ui-panel">
+                    <div class="ui-text">Score: <span id="score">0</span></div>
+                    <div class="ui-text">Level: <span id="level">1</span></div>
+                    <div class="ui-text">Biome: <span id="biome">Dragon Peak</span></div>
+                </div>
+                <div class="ui-panel">
+                    <div class="ui-text">Enemies: <span id="enemies">0/0</span></div>
+                    <div class="ui-text">Health: <span id="health">150/150</span></div>
+                </div>
+            </div>
+            
+            <!-- Ability Cooldowns -->
+            <div class="ability-cooldown">
+                <div class="ability-icon ready" id="ability-q">Q</div>
+                <div class="ability-icon ready" id="ability-shift">Shift</div>
+                <div class="ability-icon ready" id="ability-r">R</div>
+            </div>
+            
+            <!-- Start Screen -->
+            <div class="start-screen" id="startScreen">
+                <h2>Ascension of the Drakelords</h2>
+                <div class="instructions">
+                    <strong>Controls:</strong><br>
+                    WASD/Arrow Keys - Move<br>
+                    Space - Jump<br>
+                    Q - Dragon Breath (Projectile)<br>
+                    Shift - Wing Burst (Mobility)<br>
+                    R - Ancient Rage (Power Buff)<br><br>
+                    <em>Battle through diverse biomes and defeat all enemies to ascend!</em>
+                </div>
+                <button class="start-button" onclick="startGame()">Start Game</button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            Use WASD or Arrow Keys to move • Space to jump • Q/Shift/R for abilities
+        </div>
+        <div id="status" style="margin-top: 10px; color: #4ade80; font-size: 14px;">Ready to ascend!</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // UI Elements
+        const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level');
+        const biomeElement = document.getElementById('biome');
+        const enemiesElement = document.getElementById('enemies');
+        const healthElement = document.getElementById('health');
+        const startScreen = document.getElementById('startScreen');
+        
+        // Game State
+        let gameStarted = false;
+        let score = 0;
+        let currentLevel = 1;
+        let enemiesDefeated = 0;
+        let totalEnemies = 0;
+        let currentBiome = 'dragon_peak';
+        
+        // Canvas dimensions
+        const canvasWidth = 1280;
+        const canvasHeight = 720;
+        
+        // Player (Drakelord)
+        let player = {
+            x: 100,
+            y: 500,
+            width: 40,
+            height: 60,
+            velocityX: 0,
+            velocityY: 0,
+            speed: 200,
+            jumpPower: -400,
+            onGround: false,
+            health: 150,
+            maxHealth: 150,
+            level: 1,
+            experience: 0,
+            attackPower: 25,
+            defense: 10,
+            color: '#4a9eff',
+            isRageActive: false,
+            rageTimer: 0
+        };
+        
+        // Abilities
+        let abilities = {
+            dragonBreath: { cooldown: 3.0, timer: 0, ready: true },
+            wingBurst: { cooldown: 5.0, timer: 0, ready: true },
+            ancientRage: { cooldown: 10.0, timer: 0, ready: true }
+        };
+        
+        // Game objects
+        let platforms = [];
+        let enemies = [];
+        let projectiles = [];
+        let particles = [];
+        
+        // Input handling
+        let keys = {};
+        
+        // Physics
+        const gravity = 980;
+        const friction = 0.8;
+        
+        // Biome configurations
+        const biomes = {
+            dragon_peak: {
+                name: 'Dragon Peak',
+                bgColor: '#1a1a2e',
+                platformColor: '#3c3c3c'
+            },
+            ancient_ruins: {
+                name: 'Ancient Ruins',
+                bgColor: '#2d1b1b',
+                platformColor: '#4a3a3a'
+            },
+            cosmic_realm: {
+                name: 'Cosmic Realm',
+                bgColor: '#1a0d2e',
+                platformColor: '#2a1a4a'
+            }
+        };
+        
+        // Enemy types
+        const enemyTypes = {
+            cultist: { health: 40, speed: 80, damage: 15, color: '#ff8800', behavior: 'patrol' },
+            wyvern: { health: 60, speed: 120, damage: 20, color: '#00ffff', behavior: 'chase' },
+            guardian: { health: 100, speed: 60, damage: 30, color: '#ff0000', behavior: 'chase' }
+        };
+        
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            keys[e.code] = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+            keys[e.code] = false;
+        });
+        
+        function startGame() {
+            gameStarted = true;
+            startScreen.classList.add('hidden');
+            initializeLevel(currentLevel);
+        }
+        
+        function initializeLevel(level) {
+            // Clear existing objects
+            enemies = [];
+            projectiles = [];
+            particles = [];
+            enemiesDefeated = 0;
+            
+            // Set biome
+            const biomeKeys = Object.keys(biomes);
+            currentBiome = biomeKeys[(level - 1) % biomeKeys.length];
+            biomeElement.textContent = biomes[currentBiome].name;
+            
+            // Create platforms
+            platforms = [
+                { x: 0, y: 650, width: 1280, height: 70, color: biomes[currentBiome].platformColor },
+                { x: 300, y: 500, width: 200, height: 20, color: biomes[currentBiome].platformColor },
+                { x: 700, y: 400, width: 200, height: 20, color: biomes[currentBiome].platformColor },
+                { x: 500, y: 300, width: 150, height: 20, color: biomes[currentBiome].platformColor }
+            ];
+            
+            // Spawn enemies based on level
+            spawnEnemiesForLevel(level);
+            
+            // Reset player position
+            player.x = 100;
+            player.y = 500;
+            player.velocityX = 0;
+            player.velocityY = 0;
+        }
+        
+        function spawnEnemiesForLevel(level) {
+            let enemyConfigs = [];
+            
+            switch(level) {
+                case 1:
+                    enemyConfigs = [
+                        { type: 'cultist', x: 400, y: 450 },
+                        { type: 'wyvern', x: 800, y: 350 },
+                        { type: 'cultist', x: 1000, y: 600 }
+                    ];
+                    break;
+                case 2:
+                    enemyConfigs = [
+                        { type: 'guardian', x: 600, y: 350 },
+                        { type: 'wyvern', x: 400, y: 250 },
+                        { type: 'cultist', x: 900, y: 600 },
+                        { type: 'guardian', x: 1100, y: 350 }
+                    ];
+                    break;
+                default:
+                    enemyConfigs = [
+                        { type: 'guardian', x: 640, y: 250 },
+                        { type: 'wyvern', x: 400, y: 150 },
+                        { type: 'wyvern', x: 880, y: 150 }
+                    ];
+            }
+            
+            totalEnemies = enemyConfigs.length;
+            
+            enemyConfigs.forEach(config => {
+                const enemyType = enemyTypes[config.type];
+                enemies.push({
+                    x: config.x,
+                    y: config.y,
+                    width: 30,
+                    height: 40,
+                    velocityX: 0,
+                    velocityY: 0,
+                    health: enemyType.health,
+                    maxHealth: enemyType.health,
+                    speed: enemyType.speed,
+                    damage: enemyType.damage,
+                    color: enemyType.color,
+                    behavior: enemyType.behavior,
+                    patrolStart: config.x,
+                    patrolDirection: 1,
+                    attackCooldown: 0,
+                    type: config.type
+                });
+            });
+            
+            updateUI();
+        }
+        
+        function update(deltaTime) {
+            if (!gameStarted) return;
+            
+            // Update player
+            updatePlayer(deltaTime);
+            
+            // Update enemies
+            updateEnemies(deltaTime);
+            
+            // Update projectiles
+            updateProjectiles(deltaTime);
+            
+            // Update particles
+            updateParticles(deltaTime);
+            
+            // Update ability cooldowns
+            updateAbilityCooldowns(deltaTime);
+            
+            // Check win condition
+            if (enemiesDefeated >= totalEnemies && totalEnemies > 0) {
+                levelComplete();
+            }
+        }
+        
+        function updatePlayer(deltaTime) {
+            // Handle input
+            if (keys['arrowleft'] || keys['a']) {
+                player.velocityX = -player.speed;
+            } else if (keys['arrowright'] || keys['d']) {
+                player.velocityX = player.speed;
+            } else {
+                player.velocityX *= friction;
+            }
+            
+            // Jump
+            if ((keys[' '] || keys['Space'] || keys['arrowup'] || keys['w']) && player.onGround) {
+                player.velocityY = player.jumpPower;
+                player.onGround = false;
+            }
+            
+            // Abilities
+            if (keys['q'] && abilities.dragonBreath.ready) {
+                useDragonBreath();
+            }
+            if (keys['shift'] && abilities.wingBurst.ready) {
+                useWingBurst();
+            }
+            if (keys['r'] && abilities.ancientRage.ready) {
+                useAncientRage();
+            }
+            
+            // Apply gravity
+            if (!player.onGround) {
+                player.velocityY += gravity * deltaTime;
+            }
+            
+            // Update position
+
+            player.x += player.velocityX * deltaTime;
+            player.y += player.velocityY * deltaTime;
+            
+            // Keep player in bounds
+            player.x = Math.max(0, Math.min(canvasWidth - player.width, player.x));
+            
+            // Check platform collisions
+            player.onGround = false;
+            platforms.forEach(platform => {
+                if (checkCollision(player, platform)) {
+                    // Landing on top of platform
+                    if (player.velocityY > 0 && player.y < platform.y) {
+                        player.y = platform.y - player.height;
+                        player.velocityY = 0;
+                        player.onGround = true;
+                    }
+                }
+            });
+            
+            // Update rage timer
+            if (player.isRageActive) {
+                player.rageTimer -= deltaTime;
+                if (player.rageTimer <= 0) {
+                    player.isRageActive = false;
+                    player.speed = 200;
+                    player.attackPower = 25;
+                }
+            }
+            
+            // Check if player fell off the map
+            if (player.y > canvasHeight) {
+                player.health = 0;
+                gameOver();
+            }
+        }
+        
+        function updateEnemies(deltaTime) {
+            enemies.forEach((enemy, index) => {
+                if (enemy.health <= 0) return;
+                
+                // AI behavior
+                switch(enemy.behavior) {
+                    case 'patrol':
+                        enemy.x += enemy.speed * enemy.patrolDirection * deltaTime;
+                        if (Math.abs(enemy.x - enemy.patrolStart) > 100) {
+                            enemy.patrolDirection *= -1;
+                        }
+                        break;
+                    case 'chase':
+                        const dx = player.x - enemy.x;
+                        const dy = player.y - enemy.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance > 0 && distance < 300) {
+                            enemy.x += (dx / distance) * enemy.speed * deltaTime;
+                            enemy.y += (dy / distance) * enemy.speed * deltaTime;
+                        }
+                        break;
+                }
+                
+                // Apply gravity to enemies
+                enemy.velocityY += gravity * deltaTime;
+                enemy.y += enemy.velocityY * deltaTime;
+                
+                // Check platform collisions for enemies
+                let onGround = false;
+                platforms.forEach(platform => {
+                    if (checkCollision(enemy, platform)) {
+                        if (enemy.velocityY > 0 && enemy.y < platform.y) {
+                            enemy.y = platform.y - enemy.height;
+                            enemy.velocityY = 0;
+                            onGround = true;
+                        }
+                    }
+                });
+                
+                // Attack player if close
+                if (enemy.attackCooldown <= 0) {
+                    if (checkCollision(enemy, player)) {
+                        player.health -= enemy.damage;
+                        enemy.attackCooldown = 1.5;
+                        createImpactEffect(player.x + player.width/2, player.y + player.height/2);
+                        
+                        if (player.health <= 0) {
+                            gameOver();
+                        }
+                    }
+                } else {
+                    enemy.attackCooldown -= deltaTime;
+                }
+            });
+        }
+        
+        function updateProjectiles(deltaTime) {
+            projectiles.forEach((projectile, index) => {
+                projectile.x += projectile.velocityX * deltaTime;
+                projectile.y += projectile.velocityY * deltaTime;
+                projectile.lifetime -= deltaTime;
+                
+                // Check collision with enemies
+                enemies.forEach(enemy => {
+                    if (enemy.health > 0 && checkCollision(projectile, enemy)) {
+                        enemy.health -= projectile.damage;
+                        createImpactEffect(projectile.x, projectile.y);
+                        projectiles.splice(index, 1);
+                        
+                        if (enemy.health <= 0) {
+                            enemiesDefeated++;
+                            score += 100 * currentLevel;
+                            createDeathEffect(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+                        }
+                    }
+                });
+                
+                // Remove if lifetime expired or out of bounds
+                if (projectile.lifetime <= 0 || projectile.x < 0 || projectile.x > canvasWidth) {
+                    projectiles.splice(index, 1);
+                }
+            });
+        }
+        
+        function updateParticles(deltaTime) {
+            particles.forEach((particle, index) => {
+                particle.x += particle.velocityX * deltaTime;
+                particle.y += particle.velocityY * deltaTime;
+                particle.lifetime -= deltaTime;
+                particle.velocityY += gravity * 0.5 * deltaTime; // Some gravity for particles
+                
+                if (particle.lifetime <= 0) {
+                    particles.splice(index, 1);
+                }
+            });
+        }
+        
+        function updateAbilityCooldowns(deltaTime) {
+            // Dragon Breath
+            if (abilities.dragonBreath.timer > 0) {
+                abilities.dragonBreath.timer -= deltaTime;
+                abilities.dragonBreath.ready = false;
+                document.getElementById('ability-q').className = 'ability-icon cooldown';
+                document.getElementById('ability-q').textContent = Math.ceil(abilities.dragonBreath.timer);
+            } else {
+                abilities.dragonBreath.ready = true;
+                document.getElementById('ability-q').className = 'ability-icon ready';
+                document.getElementById('ability-q').textContent = 'Q';
+            }
+            
+            // Wing Burst
+            if (abilities.wingBurst.timer > 0) {
+                abilities.wingBurst.timer -= deltaTime;
+                abilities.wingBurst.ready = false;
+                document.getElementById('ability-shift').className = 'ability-icon cooldown';
+                document.getElementById('ability-shift').textContent = Math.ceil(abilities.wingBurst.timer);
+            } else {
+                abilities.wingBurst.ready = true;
+                document.getElementById('ability-shift').className = 'ability-icon ready';
+                document.getElementById('ability-shift').textContent = 'Shift';
+            }
+            
+            // Ancient Rage
+            if (abilities.ancientRage.timer > 0) {
+                abilities.ancientRage.timer -= deltaTime;
+                abilities.ancientRage.ready = false;
+                document.getElementById('ability-r').className = 'ability-icon cooldown';
+                document.getElementById('ability-r').textContent = Math.ceil(abilities.ancientRage.timer);
+            } else {
+                abilities.ancientRage.ready = true;
+                document.getElementById('ability-r').className = 'ability-icon ready';
+                document.getElementById('ability-r').textContent = 'R';
+            }
+        }
+        
+        function useDragonBreath() {
+            abilities.dragonBreath.timer = abilities.dragonBreath.cooldown;
+            
+            const projectile = {
+                x: player.x + player.width,
+                y: player.y + player.height/2,
+                width: 20,
+                height: 10,
+                velocityX: 400,
+                velocityY: 0,
+                damage: player.attackPower * (player.isRageActive ? 2 : 1),
+                lifetime: 2.0,
+                color: '#ffaa00'
+            };
+            
+            projectiles.push(projectile);
+            createWingEffect(player.x + player.width/2, player.y + player.height/2);
+        }
+        
+        function useWingBurst() {
+            abilities.wingBurst.timer = abilities.wingBurst.cooldown;
+            
+            player.velocityY = player.jumpPower * 1.5;
+            player.velocityX = player.speed * 2;
+            
+            createWingEffect(player.x + player.width/2, player.y + player.height/2);
+        }
+        
+        function useAncientRage() {
+            abilities.ancientRage.timer = abilities.ancientRage.cooldown;
+            
+            player.isRageActive = true;
+            player.rageTimer = 5.0;
+            player.speed = 300;
+            player.attackPower = 50;
+            player.color = '#ff0000';
+            
+            createRageEffect(player.x + player.width/2, player.y + player.height/2);
+        }
+        
+        function createWingEffect(x, y) {
+            for (let i = 0; i < 10; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    velocityX: (Math.random() - 0.5) * 200,
+                    velocityY: (Math.random() - 0.5) * 200,
+                    lifetime: 0.5,
+                    color: '#ffffff',
+                    size: Math.random() * 5 + 2
+                });
+            }
+        }
+        
+        function createImpactEffect(x, y) {
+            for (let i = 0; i < 8; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    velocityX: (Math.random() - 0.5) * 300,
+                    velocityY: (Math.random() - 0.5) * 300,
+                    lifetime: 0.3,
+                    color: '#ff8800',
+                    size: Math.random() * 4 + 1
+                });
+            }
+        }
+        
+        function createDeathEffect(x, y) {
+            for (let i = 0; i < 15; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    velocityX: (Math.random() - 0.5) * 400,
+                    velocityY: (Math.random() - 0.5) * 400,
+                    lifetime: 1.0,
+                    color: '#ff0000',
+                    size: Math.random() * 6 + 2
+                });
+            }
+        }
+        
+        function createRageEffect(x, y) {
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    velocityX: (Math.random() - 0.5) * 500,
+                    velocityY: (Math.random() - 0.5) * 500,
+                    lifetime: 1.5,
+                    color: '#ff0000',
+                    size: Math.random() * 8 + 3
+                });
+            }
+        }
+        
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+        
+        function render() {
+            // Clear canvas with biome background
+            ctx.fillStyle = biomes[currentBiome].bgColor;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            // Draw platforms
+            platforms.forEach(platform => {
+                ctx.fillStyle = platform.color;
+                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                ctx.strokeStyle = '#666666';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+            });
+            
+            // Draw particles (behind everything else)
+            particles.forEach(particle => {
+                ctx.globalAlpha = particle.lifetime;
+                ctx.fillStyle = particle.color;
+                ctx.fillRect(particle.x - particle.size/2, particle.y - particle.size/2, particle.size, particle.size);
+            });
+            ctx.globalAlpha = 1;
+            
+            // Draw enemies
+            enemies.forEach(enemy => {
+                if (enemy.health <= 0) return;
+                
+                ctx.fillStyle = enemy.color;
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                
+                // Enemy health bar
+                const healthPercent = enemy.health / enemy.maxHealth;
+                ctx.fillStyle = '#ff0000';
+                ctx.fillRect(enemy.x, enemy.y - 8, enemy.width, 4);
+                ctx.fillStyle = '#00ff00';
+                ctx.fillRect(enemy.x, enemy.y - 8, enemy.width * healthPercent, 4);
+            });
+            
+            // Draw projectiles
+            projectiles.forEach(projectile => {
+                ctx.fillStyle = projectile.color;
+                ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
+                
+                // Glow effect
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = projectile.color;
+                ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
+                ctx.shadowBlur = 0;
+            });
+            
+            // Draw player
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Player health bar
+            const playerHealthPercent = player.health / player.maxHealth;
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(player.x, player.y - 10, player.width, 5);
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(player.x, player.y - 10, player.width * playerHealthPercent, 5);
+            
+            // Draw level complete screen
+            if (enemiesDefeated >= totalEnemies && totalEnemies > 0) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+                
+                ctx.fillStyle = '#00ff00';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('LEVEL COMPLETE!', canvasWidth / 2, canvasHeight / 2 - 50);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '24px Arial';
+                ctx.fillText('Score: ' + score, canvasWidth / 2, canvasHeight / 2 + 20);
+                ctx.fillText('Press ENTER to continue', canvasWidth / 2, canvasHeight / 2 + 60);
+                ctx.textAlign = 'left';
+            }
+            
+            // Draw game over screen
+            if (player.health <= 0) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+                
+                ctx.fillStyle = '#ff0000';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('DEFEAT', canvasWidth / 2, canvasHeight / 2 - 50);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '24px Arial';
+                ctx.fillText('Score: ' + score, canvasWidth / 2, canvasHeight / 2 + 20);
+                ctx.fillText('Press ENTER to restart', canvasWidth / 2, canvasHeight / 2 + 60);
+                ctx.textAlign = 'left';
+            }
+        }
+        
+        function updateUI() {
+            scoreElement.textContent = score;
+            levelElement.textContent = player.level;
+            enemiesElement.textContent = enemiesDefeated + '/' + totalEnemies;
+            healthElement.textContent = Math.max(0, Math.floor(player.health)) + '/' + player.maxHealth;
+        }
+        
+        function levelComplete() {
+            score += 1000 * currentLevel;
+            currentLevel++;
+            player.level = currentLevel;
+            player.health = player.maxHealth;
+            
+            setTimeout(() => {
+                if (keys['enter']) {
+                    initializeLevel(currentLevel);
+                }
+            }, 100);
+        }
+        
+        function gameOver() {
+            // Game over logic handled in render
+        }
+        
+        // Game loop
+        let lastTime = performance.now();
+        function gameLoop(currentTime) {
+            const deltaTime = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+            
+            update(deltaTime);
+            render();
+            updateUI();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Handle enter key for level progression
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && enemiesDefeated >= totalEnemies && totalEnemies > 0) {
+                initializeLevel(currentLevel);
+            }
+            if (e.key === 'Enter' && player.health <= 0) {
+                // Reset game
+                score = 0;
+                currentLevel = 1;
+                player.health = player.maxHealth;
+                player.level = 1;
+                initializeLevel(currentLevel);
+            }
+        });
+        
+        // Start game loop
+        gameLoop(performance.now());
+    </script>
+</body>
+</html>
